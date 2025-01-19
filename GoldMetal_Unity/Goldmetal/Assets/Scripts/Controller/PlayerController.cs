@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
     bool IsSwap;
     bool IsReloading;
     bool IsFireReady = true;
+    bool IsBorder;
 
     Vector3 moveVec;
     Vector3 dodgeVec;
@@ -95,7 +96,8 @@ public class PlayerController : MonoBehaviour
         if (IsSwap || !IsFireReady || IsReloading)
             moveVec = Vector3.zero;
 
-        transform.position += moveVec * Time.deltaTime * speed;      
+        if(!IsBorder)
+            transform.position += moveVec * Time.deltaTime * speed;      
 
         
         if (anim != null)
@@ -176,7 +178,7 @@ public class PlayerController : MonoBehaviour
             anim.SetTrigger("doReload");
             IsReloading = true;
 
-            Invoke("ReloadOut", 0.5f);
+            Invoke("ReloadOut", 3.0f);
         }
     }
 
@@ -188,7 +190,6 @@ public class PlayerController : MonoBehaviour
 
         IsReloading = false;
     }
-
 
     void Dodge()
     {
@@ -207,13 +208,11 @@ public class PlayerController : MonoBehaviour
             Invoke("DodgeOut", 0.5f); //시간차 함수
         }
     }
-
     void DodgeOut()
     {
         speed *= 0.5f;
         IsDodge = false;
     }
-
     void Swap()
     {
         if (sDown1 && (!hasWeapons[0] || equipWeaponIndex == 0))
@@ -269,7 +268,24 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    void FreezeRotation()
+    {
+        //angularVelocity : 회전 속도
+        rigid.angularVelocity = Vector3.zero;
+    }
+    void StopToWall()
+    {
+        Debug.DrawRay(transform.position, transform.forward * 5, Color.green);
+        IsBorder = Physics.Raycast(transform.position, transform.forward, 5, LayerMask.GetMask("Wall"));
+    }
+    void FixedUpdate()
+    {
+        FreezeRotation();
+        StopToWall();
+    }
+
+
+    void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.tag == "Floor")
         {
@@ -279,7 +295,7 @@ public class PlayerController : MonoBehaviour
             
     }
 
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         if(other.tag == "Item")
         {
@@ -311,14 +327,14 @@ public class PlayerController : MonoBehaviour
             Destroy(item.gameObject);
         }
     }
-    private void OnTriggerStay(Collider other)
+    void OnTriggerStay(Collider other)
     {
         if(other.tag == "Weapon")
             nearObject = other.gameObject;
         
     }
 
-    private void OnTriggerExit(Collider other)
+    void OnTriggerExit(Collider other)
     {
         if(other.tag == "Weapon")
             nearObject = null;
