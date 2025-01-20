@@ -167,7 +167,7 @@ public class PlayerController : MonoBehaviour
 
                 GameObject instantGrenade = Instantiate(grenadeObj, transform.position, transform.rotation);
                 Rigidbody rigidGrenade = instantGrenade.GetComponent<Rigidbody>();
-                rigidGrenade.AddForce(nextVec, ForceMode.Impulse);
+                rigidGrenade.AddForce(nextVec * 3, ForceMode.Impulse);
                 rigidGrenade.AddTorque(Vector3.back * 10, ForceMode.Impulse);
 
                 hasGrenades--;
